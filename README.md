@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# Boxscores Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Live demo: https://boxscores-frontend.vercel.app/
 
-## Available Scripts
+This React app displays player lists, player details and player games (box scores). It was bootstrapped with Create React App and expects a backend providing player data and game endpoints.
 
-In the project directory, you can run:
+## Table of contents
 
-### `npm start`
+- [Demo](#demo)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Local development](#local-development)
+- [Available scripts](#available-scripts)
+- [Environment / configuration](#environment--configuration)
+- [Backend API (expected)](#backend-api-expected)
+- [Routing](#routing)
+- [Notes](#notes)
+- [License](#license)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Demo
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The frontend is deployed at: https://boxscores-frontend.vercel.app/
 
-### `npm test`
+## Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- List of players with thumbnail, team/college and position
+- Player details page with full image, profile fields and social links
+- Most recent game summary on player detail page
+- Full game list with filters (game type, season, opponent) and media viewer (YouTube, mp4, webm)
+- Robust handling of multiple JSON field naming conventions
 
-### `npm run build`
+## Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js 18+ and npm (or compatible)
+- Backend API running and reachable (defaults expect `http://localhost:8080` for local dev)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Local development
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Open a terminal in `frontend`
+2. Install dependencies:
+3. Start the dev server:
+4. Open `http://localhost:3000`
 
-### `npm run eject`
+## Available scripts
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `npm start` — development server
+- `npm test` — run tests (CRA test runner)
+- `npm run build` — production build into `build/`
+- `npm run eject` — eject CRA config (one-way)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Environment / configuration
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- The app uses `window.location.origin` and `process.env.PUBLIC_URL` for resolving image paths.
+- Backend origin in code defaults to `http://localhost:8080`. To point to a different backend in production, update API host in code or set up a proxy/rewrites in deployment (Vercel).
+- Routes are client-side (React Router); server should serve `index.html` for SPA routes in production.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Backend API (expected endpoints)
 
-## Learn More
+The frontend expects the backend to expose these endpoints:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- `GET /players` — list of players (array)
+- `GET /playerdetails/:encodedCombinedKey` — returns an array of player objects matching the friendly combined key OR player id
+- `GET /player/:playerId/latestgame` — latest game for a player (404 if none)
+- `GET /player/:playerId/games` — list of games for a player (accepts query params `gameType`, `season`, `opponent`)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Notes on fields: the frontend tolerates multiple naming conventions (e.g. `PlayerID`, `playerID`, `playerId`, image fields like `imageURL`, `ImageURL`, social objects under `SocialLinks` or `socialLinks`, etc.).
 
-### Code Splitting
+## Routing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- `/` — players list
+- `/player/:playerName` — player details (uses a combined key derived from name)
+- `/player/:playerKey/games` — player games list
 
-### Analyzing the Bundle Size
+## Notes
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- Image and social URL normalization logic is implemented client-side to support relative URLs, data URIs and common host formats.
+- When deploying to Vercel (or another static host), point the build to the backend via environment variables or platform rewrite rules to avoid CORS issues.
+- The app uses accessible patterns (aria attributes, keyboard Escape to close dialogs).
 
-### Making a Progressive Web App
+## License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+MIT
+4. 
