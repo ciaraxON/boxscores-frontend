@@ -50,6 +50,7 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
   }, [playerName, backendOrigin]);
 
   // fetch latest games for each returned player
+  // javascript
   useEffect(() => {
     if (!items || items.length === 0) {
       setLatestGames({});
@@ -70,11 +71,47 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
     const promises = toFetch.map((id) => {
       const ctrl = new AbortController();
       controllers[id] = ctrl;
-      return fetch(`${backendOrigin}/player/${encodeURIComponent(id)}/latestgame`, { signal: ctrl.signal })
+
+      const latestUrl = `${backendOrigin}/player/${encodeURIComponent(id)}/latestgame`;
+      const gamesUrl = `${backendOrigin}/player/${encodeURIComponent(id)}/games`;
+
+      return fetch(latestUrl, { signal: ctrl.signal })
         .then((res) => {
           if (res.status === 404) return { id, game: null };
           if (!res.ok) return { id, game: null };
-          return res.json().then((game) => ({ id, game }));
+          return res.json().then((body) => {
+            // If backend returns an array of games, pick the most recent by GameDate.
+            if (Array.isArray(body)) {
+              const list = sortGamesByDateDesc(body);
+              return { id, game: list[0] ?? null };
+            }
+
+            // If backend returns an object with a games array, handle that too.
+            if (body && typeof body === 'object' && Array.isArray(body.games)) {
+              const list = sortGamesByDateDesc(body.games);
+              return { id, game: list[0] ?? null };
+            }
+
+            // If backend returned a single object (likely ordered by insertion),
+            // fetch the full games list and pick the most recent by GameDate.
+            if (body && typeof body === 'object') {
+              return fetch(gamesUrl, { signal: ctrl.signal })
+                .then((r2) => {
+                  if (!r2.ok) return { id, game: body ?? null };
+                  return r2.json().then((gamesBody) => {
+                    const list = Array.isArray(gamesBody)
+                      ? sortGamesByDateDesc(gamesBody)
+                      : (gamesBody && Array.isArray(gamesBody.games) ? sortGamesByDateDesc(gamesBody.games) : []);
+                    // prefer the date-sorted result, but fall back to the original object if nothing returned
+                    return { id, game: list[0] ?? body ?? null };
+                  }).catch(() => ({ id, game: body ?? null }));
+                })
+                .catch(() => ({ id, game: body ?? null }));
+            }
+
+            // otherwise no usable game
+            return { id, game: null };
+          }).catch(() => ({ id, game: null }));
         })
         .catch(() => ({ id, game: null }));
     });
@@ -93,6 +130,44 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
       });
     };
   }, [items, backendOrigin]);
+
+
+  // Date parsing and sorting helpers to match PlayerGames logic
+  const parseGameDate = (raw) => {
+    if (raw == null || raw === '') return NaN;
+    if (typeof raw === 'number') return raw;
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim();
+      if (/^\d+$/.test(trimmed)) {
+        const n = Number(trimmed);
+        return trimmed.length <= 10 ? n * 1000 : n;
+      }
+      const native = Date.parse(trimmed);
+      if (!Number.isNaN(native)) return native;
+      const dmy = trimmed.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+      if (dmy) {
+        const day = Number(dmy[1]);
+        const month = Number(dmy[2]) - 1;
+        const year = Number(dmy[3]);
+        return Date.UTC(year, month, day);
+      }
+      const ymd = trimmed.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+      if (ymd) {
+        return Date.UTC(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+      }
+    }
+    return NaN;
+  };
+
+  const sortGamesByDateDesc = (arr) => {
+    return [...arr].sort((a, b) => {
+      const aRaw = a?.GameDate ?? a?.gameDate ?? '';
+      const bRaw = b?.GameDate ?? b?.gameDate ?? '';
+      const pa = parseGameDate(aRaw) || 0;
+      const pb = parseGameDate(bRaw) || 0;
+      return pb - pa;
+    });
+  };
 
   const handleBack = useCallback(() => {
     try {
@@ -117,13 +192,24 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
   }, [handleBack]);
 
   const formatDate = (raw) => {
-    if (!raw) return '';
+    if (raw === null || raw === undefined || raw === '') return '';
+    const ts = parseGameDate(raw);
+    if (!Number.isNaN(ts)) {
+      const d = new Date(ts);
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    // fallback
     const d = new Date(raw);
-    if (isNaN(d.getTime())) return String(raw);
-    const day = String(d.getUTCDate()).padStart(2, '0');
-    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const year = d.getUTCFullYear();
-    return `${day}/${month}/${year}`;
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    return String(raw);
   };
 
   if (loading) return <p className="lead">Loading player details…</p>;
