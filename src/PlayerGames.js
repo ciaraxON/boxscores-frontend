@@ -223,7 +223,6 @@ export default function PlayerGames({ backendOrigin }) {
     return !!url.match(/\.(mp4|webm|ogg)(\?|$)/i);
   };
 
-  // Thumbnails now use 100% width so they fill the panel; fixed height to keep consistent layout.
   const renderThumbnail = (url) => {
     const placeholder = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
     const h = 160;
@@ -284,7 +283,6 @@ export default function PlayerGames({ backendOrigin }) {
     );
   };
 
-  // Each media item fills the panel width; title (if any) shown underneath.
   const renderMediaList = (label, arr) => {
     const items = Array.isArray(arr) ? arr : [];
     if (items.length === 0) return null;
@@ -294,7 +292,6 @@ export default function PlayerGames({ backendOrigin }) {
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>{label}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {items.map((u, idx) => {
-            // Media may be a string or an object { url, link, title }
             const url = (typeof u === 'string') ? u : (u?.url ?? u?.link ?? '');
             const title = (typeof u === 'string') ? '' : (u?.title ?? u?.label ?? '');
             return (
@@ -417,14 +414,17 @@ export default function PlayerGames({ backendOrigin }) {
                     <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{gameTypeVal}</div>
                   </div>
 
-                  <div style={{ flex: '1 1 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontWeight: 700 }}>{team}</div>
-                      <div style={{ fontSize: 14, color: '#222' }}>{teamPts}</div>
+                  {/* Center column: "Team vs Opponent" with score below */}
+                  <div style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', textAlign: 'center', color: '#222', whiteSpace: 'normal', overflow: 'visible', wordBreak: 'break-word' }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '100%' }}>
+                        <span style={{ whiteSpace: 'normal', display: 'inline-block' }}>{team}</span>
+                        <span style={{ color: '#666', margin: '0 4px' }}>vs</span>
+                        <span style={{ whiteSpace: 'normal', display: 'inline-block' }}>{opp}</span>
+                      </div>
                     </div>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontWeight: 700 }}>{opp}</div>
-                      <div style={{ fontSize: 14, color: '#222' }}>{oppPts}</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#222', marginTop: 4, justifyContent: 'center', marginLeft: -50 }}>
+                      {(teamPts !== '' || oppPts !== '') ? `${teamPts} - ${oppPts}` : '—'}
                     </div>
                   </div>
 
@@ -473,7 +473,7 @@ export default function PlayerGames({ backendOrigin }) {
               position: 'fixed',
               top: 125,
               right: 100,
-              width: 340,           // fixed panel width to match thumbnails' fill
+              width: 340,
               boxSizing: 'border-box',
               padding: 16,
               maxHeight: '80vh',
