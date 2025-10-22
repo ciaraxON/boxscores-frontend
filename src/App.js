@@ -9,7 +9,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const placeholder = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-  const backendOrigin = process.env.REACT_APP_API_URL;
+  const backendOrigin = import.meta.env.VITE_API_URL;
   const frontendOrigin = window.location.origin || (process.env.PUBLIC_URL || 'http://localhost:3000');
 
   function normalizeImageUrl(raw) {
