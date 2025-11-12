@@ -158,15 +158,15 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
     return NaN;
   };
 
-  const sortGamesByDateDesc = (arr) => {
-    return [...arr].sort((a, b) => {
-      const aRaw = a?.GameDate ?? a?.gameDate ?? '';
-      const bRaw = b?.GameDate ?? b?.gameDate ?? '';
-      const pa = parseGameDate(aRaw) || 0;
-      const pb = parseGameDate(bRaw) || 0;
-      return pb - pa;
-    });
-  };
+  const sortGamesByDateDesc = useCallback((arr) => {
+  return [...arr].sort((a, b) => {
+    const aRaw = a?.GameDate ?? a?.gameDate ?? '';
+    const bRaw = b?.GameDate ?? b?.gameDate ?? '';
+    const pa = parseGameDate(aRaw) || 0;
+    const pb = parseGameDate(bRaw) || 0;
+    return pb - pa;
+  });
+}, []);
 
   const handleBack = useCallback(() => {
     try {
