@@ -125,14 +125,14 @@ export default function PlayerGames({ backendOrigin }) {
       }
       const native = Date.parse(trimmed);
       if (!Number.isNaN(native)) return native;
-      const dmy = trimmed.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+      const dmy = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
       if (dmy) {
         const day = Number(dmy[1]);
         const month = Number(dmy[2]) - 1;
         const year = Number(dmy[3]);
         return Date.UTC(year, month, day);
       }
-      const ymd = trimmed.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+      const ymd = trimmed.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
       if (ymd) {
         return Date.UTC(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
       }
