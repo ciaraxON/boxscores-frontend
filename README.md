@@ -1,7 +1,5 @@
 # Boxscores Frontend
 
-Live demo: https://boxscores-frontend.vercel.app/
-
 This React app displays player lists, player details and player games (box scores). It was bootstrapped with Create React App and expects a backend providing player data and game endpoints.
 
 ## Table of contents
