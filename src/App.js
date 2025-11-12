@@ -40,7 +40,7 @@ export default function App() {
         setPlayers([]);
         setLoading(false);
       });
-  }, []);
+  }, [backendOrigin]);
 
   const renderBaseName = (p) => {
     const first = p.firstName ?? p.FirstName ?? '';
