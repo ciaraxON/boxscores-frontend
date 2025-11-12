@@ -48,6 +48,43 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
       });
   }, [playerName, backendOrigin]);
 
+  // Date parsing and sorting helpers to match PlayerGames logic
+  const parseGameDate = (raw) => {
+    if (raw == null || raw === '') return NaN;
+    if (typeof raw === 'number') return raw;
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim();
+      if (/^\d+$/.test(trimmed)) {
+        const n = Number(trimmed);
+        return trimmed.length <= 10 ? n * 1000 : n;
+      }
+      const native = Date.parse(trimmed);
+      if (!Number.isNaN(native)) return native;
+      const dmy = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+      if (dmy) {
+        const day = Number(dmy[1]);
+        const month = Number(dmy[2]) - 1;
+        const year = Number(dmy[3]);
+        return Date.UTC(year, month, day);
+      }
+      const ymd = trimmed.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+      if (ymd) {
+        return Date.UTC(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+      }
+    }
+    return NaN;
+  };
+
+  const sortGamesByDateDesc = useCallback((arr) => {
+  return [...arr].sort((a, b) => {
+    const aRaw = a?.GameDate ?? a?.gameDate ?? '';
+    const bRaw = b?.GameDate ?? b?.gameDate ?? '';
+    const pa = parseGameDate(aRaw) || 0;
+    const pb = parseGameDate(bRaw) || 0;
+    return pb - pa;
+  });
+}, []);
+
   // fetch latest games for each returned player
   // javascript
   useEffect(() => {
@@ -129,44 +166,6 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
       });
     };
   }, [items, backendOrigin, sortGamesByDateDesc]);
-
-
-  // Date parsing and sorting helpers to match PlayerGames logic
-  const parseGameDate = (raw) => {
-    if (raw == null || raw === '') return NaN;
-    if (typeof raw === 'number') return raw;
-    if (typeof raw === 'string') {
-      const trimmed = raw.trim();
-      if (/^\d+$/.test(trimmed)) {
-        const n = Number(trimmed);
-        return trimmed.length <= 10 ? n * 1000 : n;
-      }
-      const native = Date.parse(trimmed);
-      if (!Number.isNaN(native)) return native;
-      const dmy = trimmed.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
-      if (dmy) {
-        const day = Number(dmy[1]);
-        const month = Number(dmy[2]) - 1;
-        const year = Number(dmy[3]);
-        return Date.UTC(year, month, day);
-      }
-      const ymd = trimmed.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
-      if (ymd) {
-        return Date.UTC(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
-      }
-    }
-    return NaN;
-  };
-
-  const sortGamesByDateDesc = useCallback((arr) => {
-  return [...arr].sort((a, b) => {
-    const aRaw = a?.GameDate ?? a?.gameDate ?? '';
-    const bRaw = b?.GameDate ?? b?.gameDate ?? '';
-    const pa = parseGameDate(aRaw) || 0;
-    const pb = parseGameDate(bRaw) || 0;
-    return pb - pa;
-  });
-}, []);
 
   const handleBack = useCallback(() => {
     try {
