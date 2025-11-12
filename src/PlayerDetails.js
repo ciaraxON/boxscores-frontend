@@ -129,7 +129,7 @@ export default function PlayerDetails({ backendOrigin, frontendOrigin }) {
         try { c.abort(); } catch (e) {}
       });
     };
-  }, [items, backendOrigin]);
+  }, [items, backendOrigin, sortGamesByDateDesc]);
 
 
   // Date parsing and sorting helpers to match PlayerGames logic
