@@ -155,6 +155,7 @@ export default function PlayerGames({ backendOrigin }) {
     if (gType) params.append('gameType', gType);
     if (s) params.append('season', s);
     if (opp) params.append('opponent', opp);
+    const queryString = params.toString();
     const url = `${backendOrigin}/player/${encodeURIComponent(id)}/games${params.toString() ? '?' + params.toString() : ''}`;
     return fetch(url)
       .then((r) => {
